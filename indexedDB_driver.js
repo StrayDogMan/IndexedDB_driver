@@ -19,27 +19,6 @@ export async function initDB(){
     console.log("initDB");
     return new Promise((resolve, reject)=>{
         let openRequest = indexedDB.open(db_name, version);
-        openRequest.onsuccess = function(){
-            let db = event.target.result;
-            for(let table of table_list){
-                console.log("initeDB table");
-                
-                let objectStore = db.transaction([table[0]]).objectStore(table[0]);
-                objectStore.openCursor().onsuccess = ()=>{
-                    console.log("exist table");
-                };
-                objectStore.openCursor().onerror = ()=>{
-                    _create_table(db, table[0], table[1]).then((result)=>{
-                        if(!result){
-                            reject(false);
-                        }
-                    }).catch(()=>{
-                        reject(false);
-                    })
-                };
-            }
-        }
-
         openRequest.onupgradeneeded = function() {
             console.log("onupgradeneeded");
             let db = openRequest.result;
@@ -89,7 +68,9 @@ export async function getData(table, key){
             req.onsuccess = () => resolve(req.result);
             req.onerror = reject;
         }
-    })
+
+        request.onerror = reject
+    });
 }
 
 // 一括取得
